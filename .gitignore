@@ -1,0 +1,58 @@
+# =========================
+# ENV & SECRETS (CRITICAL)
+# =========================
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+private.key
+
+# =========================
+# NODE / NEXTJS
+# =========================
+node_modules/
+.next/
+out/
+build/
+.vercel/
+
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# =========================
+# FOUNDRY (inside /contracts)
+# =========================
+
+
+contracts/lib/forge-std
+
+# If foundry is at root instead
+broadcast/
+cache/
+out/
+
+# =========================
+# COVERAGE
+# =========================
+coverage/
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# TYPESCRIPT
+# =========================
+*.tsbuildinfo
+next-env.d.ts
