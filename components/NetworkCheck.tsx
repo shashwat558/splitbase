@@ -9,7 +9,6 @@ export function NetworkCheck() {
   const { isConnected } = useAccount();
   const { switchChain, isPending } = useSwitchChain();
 
-  // Auto-switch as soon as a wrong-network wallet connects
   useEffect(() => {
     if (isConnected && chainId !== baseSepolia.id) {
       switchChain({ chainId: baseSepolia.id });

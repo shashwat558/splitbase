@@ -1,15 +1,4 @@
-/**
- * GroupTreasuryFactory + GroupTreasury contract interfaces for the frontend.
- *
- * Deploy the factory once:
- *   forge script script/DeployTreasuryFactory.s.sol \
- *     --rpc-url https://sepolia.base.org --account deployer --broadcast
- *
- * Then set in .env:
- *   NEXT_PUBLIC_TREASURY_FACTORY_ADDRESS=0x...
- */
-
-// ─── Factory ──────────────────────────────────────────────────────────────────
+"use client";
 
 export const TREASURY_FACTORY_ADDRESS =
   (process.env.NEXT_PUBLIC_TREASURY_FACTORY_ADDRESS ?? "") as `0x${string}`;
@@ -43,7 +32,6 @@ export const TREASURY_FACTORY_ABI = [
   },
 ] as const;
 
-// ─── Treasury instance ────────────────────────────────────────────────────────
 
 export const GROUP_TREASURY_ABI = [
   {

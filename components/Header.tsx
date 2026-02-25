@@ -22,13 +22,11 @@ export function Header() {
   const { address } = useWallet();
   const { formatted: usdcBalance } = useUSDCBalance(address);
   
-  // Theme Toggle State
   const [theme, setTheme] = useState("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    // Check localStorage or system preference on mount
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       setTheme(savedTheme);
@@ -46,7 +44,7 @@ export function Header() {
     localStorage.setItem("theme", newTheme);
   };
 
-  if (!mounted) return null; // Avoid hydration mismatch
+  if (!mounted) return null;
 
   return (
     <header className="border-b border-border bg-background px-6 py-5 flex items-center justify-between sticky top-0 z-50 transition-colors duration-300">
@@ -55,7 +53,6 @@ export function Header() {
       </Link>
 
       <div className="flex items-center gap-4">
-        {/* Simple Theme Toggle Button */}
         <button 
           onClick={toggleTheme}
           className="p-2 border border-border bg-card text-foreground hover:bg-muted/10 transition-colors rounded-sm"

@@ -10,6 +10,7 @@ import { SettleButton } from "@/components/SettleButton";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ShareLink } from "@/components/ShareLink";
 import { TreasuryPanel } from "@/components/TreasuryPanel";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { useGroupRealtime } from "@/hooks/useGroupRealtime";
 import { useWallet } from "@/hooks/useWallet";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +38,7 @@ export default function GroupPage({
   const [addMember, setAddMember] = useState("");
   const [addingMember, setAddingMember] = useState(false);
   const [memberError, setMemberError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"overview" | "analytics">("overview");
 
   useEffect(() => {
     if (!isConnected) router.push("/");
@@ -175,11 +177,47 @@ export default function GroupPage({
                 </span>
               </p>
             </div>
-            <ShareLink groupId={id} />
+            <div className="flex items-center gap-4">
+              {/* Tab Toggle */}
+              <div className="flex border border-border rounded-sm overflow-hidden">
+                <button
+                  onClick={() => setActiveTab("overview")}
+                  className={`px-4 py-2 text-xs font-mono uppercase tracking-widest transition-colors ${
+                    activeTab === "overview"
+                      ? "bg-foreground text-background font-bold"
+                      : "bg-card text-muted hover:text-foreground"
+                  }`}
+                >
+                  Overview
+                </button>
+                <button
+                  onClick={() => setActiveTab("analytics")}
+                  className={`px-4 py-2 text-xs font-mono uppercase tracking-widest transition-colors ${
+                    activeTab === "analytics"
+                      ? "bg-foreground text-background font-bold"
+                      : "bg-card text-muted hover:text-foreground"
+                  }`}
+                >
+                  Analytics
+                </button>
+              </div>
+              <ShareLink groupId={id} />
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* ── Analytics Tab ── */}
+        {activeTab === "analytics" && (
+          <AnalyticsDashboard
+            expenses={expenses}
+            settlements={settlements}
+            members={members}
+            currentAddress={address ?? undefined}
+          />
+        )}
+
+        {/* ── Overview Tab ── */}
+        <div className={activeTab === "overview" ? "grid grid-cols-1 lg:grid-cols-3 gap-10" : "hidden"}>
           {/* Left: Expenses & History */}
           <div className="lg:col-span-2 space-y-10">
             {/* Expense List */}
@@ -335,3 +373,4 @@ export default function GroupPage({
     </div>
   );
 }
+

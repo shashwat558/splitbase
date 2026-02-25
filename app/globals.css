@@ -12,7 +12,6 @@
 
 @layer base {
   :root {
-    /* Dark Theme (Default) */
     --background: #050505;
     --foreground: #f0f0f0;
     --card-bg: #0a0a0a;
@@ -25,7 +24,6 @@
   }
 
   [data-theme="light"] {
-    /* Light Theme */
     --background: #ffffff;
     --foreground: #111111;
     --card-bg: #f5f5f5;
@@ -41,7 +39,7 @@
     color: var(--foreground);
     font-family: var(--font-inter), system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
-    font-size: 16px; /* Increased base size */
+    font-size: 16px;
     line-height: 1.6;
     transition: background-color 0.3s, color 0.3s;
   }
@@ -51,7 +49,7 @@
   background-color: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 1.5rem; /* Increased padding */
+  padding: 1.5rem;
 }
 
 @utility minimal-input {
@@ -60,8 +58,8 @@
   color: var(--foreground);
   font-family: var(--font-mono);
   border-radius: 2px;
-  padding: 0.75rem 1rem; /* Bigger touch target */
-  font-size: 1rem; /* Bigger text */
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
 }
 
 /* @utility minimal-input:focus {
@@ -74,24 +72,13 @@
   color: var(--background);
   border: 1px solid var(--foreground);
   border-radius: 2px;
-  padding: 0.75rem 1.5rem; /* Bigger button */
+  padding: 0.75rem 1.5rem;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-/* @utility btn-primary:hover {
-  background-color: transparent;
-  color: var(--foreground);
-} */
-
-/* @utility btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-} */
-
-/* Adjust scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -105,8 +92,6 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--muted);
 }
-
-/* ─── Animations ───────────────────────────────────────────────────────────── */
 
 @keyframes scan {
   0% { transform: translateY(-100%); opacity: 0; }
@@ -142,11 +127,10 @@
 }
 
 @utility animate-fade-in-up {
-  opacity: 0; /* start hidden */
+  opacity: 0;
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Stagger utilities */
 @utility delay-100 { animation-delay: 100ms; }
 @utility delay-200 { animation-delay: 200ms; }
 @utility delay-300 { animation-delay: 300ms; }

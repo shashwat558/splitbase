@@ -53,8 +53,10 @@ export function TreasuryPanel({
 
   const balanceEth = balanceWei ? parseFloat(formatEther(balanceWei as bigint)) : 0;
 
-  // ─── Settlement math ───────────────────────────────────────────────────────
   const balances = computeNetBalancesWithSettlements(expenses, settlements, members);
+
+  const hasBeenDispersed = !!treasuryAddress &&
+    settlements.some((s) => s.paid_by.toLowerCase() === treasuryAddress.toLowerCase());
 
   /** Members who owe money (net < 0) */
   const debtors = balances
@@ -68,7 +70,7 @@ export function TreasuryPanel({
 
   const myBalanceEntry = balances.find((b) => b.address === currentAddress.toLowerCase());
   const myBalance = myBalanceEntry?.net ?? 0;
-  const myDebt    = myBalance < -0.000001 ? Math.abs(myBalance) : 0;
+  const myDebt    = myBalance < -0.000001 && !hasBeenDispersed ? Math.abs(myBalance) : 0;
 
   const totalToDisperse = creditors.reduce((s, c) => s + c.owed, 0);
 
@@ -228,7 +230,7 @@ export function TreasuryPanel({
       )}
 
       {/* My deposit action */}
-      {myDebt > 0 && (
+      {myDebt > 0 && !hasBeenDispersed && (
         <div className="space-y-3 border-t border-border pt-4">
           <p className="text-xs font-mono text-muted uppercase tracking-widest">Your_Deposit</p>
           <p className="text-xs font-mono text-muted">
@@ -272,7 +274,10 @@ export function TreasuryPanel({
                 </a>
               )}
               <button
-                onClick={depositHook.reset}
+                onClick={() => {
+                  depositHook.reset();
+                  setDepositInput("");
+                }}
                 className="w-full border border-border text-xs font-mono py-2 uppercase text-muted hover:text-foreground transition-colors"
               >
                 CLOSE
@@ -292,6 +297,13 @@ export function TreasuryPanel({
                "DEPOSIT_TO_TREASURY →"}
             </button>
           )}
+        </div>
+      )}
+
+      {hasBeenDispersed && myBalance < -0.000001 && (
+        <div className="border-t border-border pt-4">
+          <p className="text-xs font-mono text-yellow-500 uppercase tracking-widest">Settled_Via_Treasury</p>
+          <p className="text-xs font-mono text-muted mt-2">Admin dispersed the treasury. Your debt has been cleared.</p>
         </div>
       )}
 

@@ -1,11 +1,4 @@
-/**
- * SettlementReceipt contract interface for the frontend.
- *
- * Set NEXT_PUBLIC_RECEIPT_CONTRACT_ADDRESS in .env after deploying:
- *   cd contracts
- *   forge script script/DeployReceipt.s.sol --rpc-url https://sepolia.base.org \
- *     --private-key $PRIVATE_KEY --broadcast
- */
+"use client";
 
 export const RECEIPT_CONTRACT_ADDRESS =
   (process.env.NEXT_PUBLIC_RECEIPT_CONTRACT_ADDRESS ?? "0x0000000000000000000000000000000000000000") as `0x${string}`;
@@ -13,7 +6,6 @@ export const RECEIPT_CONTRACT_ADDRESS =
 export const RECEIPT_CONTRACT_DEPLOYED =
   RECEIPT_CONTRACT_ADDRESS !== "0x0000000000000000000000000000000000000000";
 
-// ─── ABI ─────────────────────────────────────────────────────────────────────
 
 export const SETTLEMENT_RECEIPT_ABI = [
   {

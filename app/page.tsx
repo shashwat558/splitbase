@@ -6,7 +6,6 @@ import { useWallet } from "@/hooks/useWallet";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-// Ticker text content
 const TICKER_TEXT = " // ONCHAIN_EXPENSE_SETTLEMENT // BUILT_ON_BASE // ZERO_DOWNTIME // TRUSTLESS_TREASURY // SPLIT_WITH_FRIENDS // ETH_NATIVE // ";
 
 function Ticker({ direction = "left", speed = "30s" }: { direction?: "left" | "right", speed?: string }) {
@@ -19,7 +18,6 @@ function Ticker({ direction = "left", speed = "30s" }: { direction?: "left" | "r
           animationDuration: speed
         }}
       >
-        {/* Repeat enough times to fill screen width */}
         {[...Array(8)].map((_, i) => (
           <span key={i} className="mx-4">{TICKER_TEXT}</span>
         ))}

@@ -25,7 +25,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Script to prevent theme flash
+
   const themeScript = `
     (function() {
       try {

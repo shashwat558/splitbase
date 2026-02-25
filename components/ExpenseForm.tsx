@@ -26,7 +26,6 @@ export function ExpenseForm({ groupId, paidBy, members, authFetch, onCreated }: 
     setSplitAmounts((prev) =>
       Object.fromEntries(otherMembers.map((m) => [m, prev[m] ?? ""]))
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [members.join(","), paidBy]);
 
   const total = otherMembers.reduce((sum, m) => {
