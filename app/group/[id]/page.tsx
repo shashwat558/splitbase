@@ -14,6 +14,7 @@ import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { useGroupRealtime } from "@/hooks/useGroupRealtime";
 import { useWallet } from "@/hooks/useWallet";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/components/Toast";
 import { formatUSDC } from "@/lib/usdc";
 import type { Expense, Group, Settlement } from "@/types";
 
@@ -28,8 +29,7 @@ export default function GroupPage({
 }) {
   const { id } = use(params);
   const { address, isConnected } = useWallet();
-  const { authFetch, isSigning } = useAuth();
-  const router = useRouter();
+  const { authFetch, isSigning } = useAuth();  const { toast } = useToast();  const router = useRouter();
 
   const [group, setGroup] = useState<GroupDetail | null>(null);
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -87,19 +87,26 @@ export default function GroupPage({
       }
       setAddMember("");
       fetchData();
+      toast("Member added! 👥", "success");
     } catch (err) {
       setMemberError((err as Error).message);
+      toast((err as Error).message, "error");
     } finally {
       setAddingMember(false);
     }
   }
 
   async function handleDeleteExpense(expenseId: string) {
-    await authFetch(
-      `/api/groups/${id}/expenses?expense_id=${expenseId}`,
-      { method: "DELETE" }
-    );
-    fetchData();
+    try {
+      await authFetch(
+        `/api/groups/${id}/expenses?expense_id=${expenseId}`,
+        { method: "DELETE" }
+      );
+      fetchData();
+      toast("Expense removed", "info");
+    } catch (err) {
+      toast((err as Error).message, "error");
+    }
   }
 
   if (loading) {
@@ -108,8 +115,19 @@ export default function GroupPage({
         <Header />
         <main className="mx-auto max-w-7xl px-6 py-12">
           <div className="animate-pulse space-y-6">
-            <div className="h-10 w-1/3 bg-card" />
-            <div className="h-5 w-1/4 bg-card" />
+            <div className="h-5 w-24 bg-card rounded-lg" />
+            <div className="h-9 w-1/3 bg-card rounded-lg" />
+            <div className="h-4 w-1/2 bg-card rounded-lg" />
+            <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="h-48 bg-card rounded-xl" />
+                <div className="h-32 bg-card rounded-xl" />
+              </div>
+              <div className="space-y-4">
+                <div className="h-48 bg-card rounded-xl" />
+                <div className="h-32 bg-card rounded-xl" />
+              </div>
+            </div>
           </div>
         </main>
       </div>
@@ -120,10 +138,14 @@ export default function GroupPage({
     return (
       <div className="min-h-screen bg-background text-foreground transition-colors duration-300">
         <Header />
-        <main className="mx-auto max-w-2xl px-6 py-16 text-center">
-          <p className="text-base text-red-500 font-mono mb-6">ERROR: GROUP_NOT_FOUND</p>
-          <Link href="/dashboard" className="btn-primary px-6 py-3 text-sm uppercase tracking-widest">
-            ← RETURN_DASHBOARD
+        <main className="mx-auto max-w-2xl px-6 py-24 text-center">
+          <div className="text-5xl mb-6">🔍</div>
+          <h2 className="text-xl font-bold text-foreground mb-2">Group not found</h2>
+          <p className="text-sm text-muted mb-8">
+            This group doesn&apos;t exist or you may not have access to it.
+          </p>
+          <Link href="/dashboard" className="btn-primary px-6 py-3 text-sm font-semibold rounded-lg inline-flex items-center gap-2">
+            ← Back to Dashboard
           </Link>
         </main>
       </div>
@@ -142,49 +164,52 @@ export default function GroupPage({
       <Header />
 
       {isSigning && (
-        <div className="bg-card border-b border-border px-6 py-3 text-center text-sm font-mono text-muted">
-          <span className="animate-pulse mr-2">●</span> WAITING_FOR_SIGNATURE...
+        <div className="bg-accent/5 border-b border-accent/20 px-6 py-3 text-center text-sm text-accent font-medium flex items-center justify-center gap-2">
+          <span className="animate-spin-slow inline-block">⟳</span>
+          Waiting for your wallet signature…
         </div>
       )}
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-12">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
         {/* Breadcrumb + Header */}
-        <div className="mb-12 border-b border-border pb-8">
-          <div className="flex items-center gap-3 text-xs font-mono text-muted mb-4 uppercase tracking-widest">
-            <Link href="/dashboard" className="hover:text-foreground transition-colors underline decoration-dotted">
-              DASHBOARD
+        <div className="mb-8">
+          <div className="flex items-center gap-2 text-sm text-muted mb-4">
+            <Link href="/dashboard" className="hover:text-foreground transition-colors">
+              Dashboard
             </Link>
-            <span>/</span>
-            <span>GROUP: {group.id.slice(0, 6)}...</span>
+            <span className="text-border">›</span>
+            <span className="text-foreground font-medium">{group.name}</span>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-4 mb-2">
-                <h1 className="text-4xl font-bold tracking-tighter text-foreground uppercase">
+              <div className="flex items-center gap-3 mb-1.5">
+                <h1 className="text-2xl font-bold text-foreground">
                   {group.name}
                 </h1>
                 {isAdmin && (
-                  <span className="border border-border text-xs font-mono px-3 py-1 text-muted bg-card font-bold">
-                    ADMIN
+                  <span className="bg-accent/10 border border-accent/30 text-accent text-xs px-2.5 py-1 rounded-full font-semibold">
+                    Admin
                   </span>
                 )}
               </div>
-              <p className="text-sm font-mono text-muted">
-                MEMBERS: {members.length} // EXPENSES: {expenses.length} // TOTAL: {formatUSDC(totalExpenses)}
-                <span className="ml-4 inline-flex items-center gap-1.5 text-xs text-accent">
+              <div className="flex items-center gap-4 text-sm text-muted">
+                <span>{members.length} members</span>
+                <span>{expenses.length} expenses</span>
+                <span>{formatUSDC(totalExpenses)} total</span>
+                <span className="inline-flex items-center gap-1.5 text-accent text-xs">
                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-                  LIVE
+                  Live
                 </span>
-              </p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {/* Tab Toggle */}
-              <div className="flex border border-border rounded-sm overflow-hidden">
+              <div className="flex border border-border rounded-lg overflow-hidden">
                 <button
                   onClick={() => setActiveTab("overview")}
-                  className={`px-4 py-2 text-xs font-mono uppercase tracking-widest transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === "overview"
-                      ? "bg-foreground text-background font-bold"
+                      ? "bg-foreground text-background font-semibold"
                       : "bg-card text-muted hover:text-foreground"
                   }`}
                 >
@@ -192,9 +217,9 @@ export default function GroupPage({
                 </button>
                 <button
                   onClick={() => setActiveTab("analytics")}
-                  className={`px-4 py-2 text-xs font-mono uppercase tracking-widest transition-colors ${
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${
                     activeTab === "analytics"
-                      ? "bg-foreground text-background font-bold"
+                      ? "bg-foreground text-background font-semibold"
                       : "bg-card text-muted hover:text-foreground"
                   }`}
                 >
@@ -217,43 +242,49 @@ export default function GroupPage({
         )}
 
         {/* ── Overview Tab ── */}
-        <div className={activeTab === "overview" ? "grid grid-cols-1 lg:grid-cols-3 gap-10" : "hidden"}>
+        <div className={activeTab === "overview" ? "grid grid-cols-1 lg:grid-cols-3 gap-8" : "hidden"}>
           {/* Left: Expenses & History */}
-          <div className="lg:col-span-2 space-y-10">
+          <div className="lg:col-span-2 space-y-6">
             {/* Expense List */}
-            <div className="minimal-card bg-card p-6">
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6 border-b border-border pb-2">
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h3 className="text-base font-semibold text-foreground mb-4">
                 Expenses
               </h3>
               {expenses.length === 0 ? (
-                <p className="text-sm font-mono text-muted py-4">NO_EXPENSES_YET — add one as admin</p>
+                <div className="py-8 text-center border border-dashed border-border rounded-lg">
+                  <p className="text-sm text-muted">
+                    No expenses yet.{isAdmin ? " Add the first one using the form →" : " The admin will add expenses here."}
+                  </p>
+                </div>
               ) : (
-                <ul className="space-y-3">
+                <ul className="space-y-2">
                   {expenses.map((exp) => {
                     const date = new Date(exp.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
                     return (
-                      <li key={exp.id} className="flex items-center justify-between border-b border-border pb-3 last:border-0">
+                      <li key={exp.id} className="flex items-center justify-between py-3 border-b border-border/60 last:border-0 group">
                         <div>
-                          <p className="text-sm font-medium text-foreground">{exp.description}</p>
-                          <p className="text-xs font-mono text-muted mt-1">
-                            PAID_BY:{" "}
-                            {exp.paid_by.toLowerCase() === address?.toLowerCase()
-                              ? "YOU"
-                              : `${exp.paid_by.slice(0, 6)}…${exp.paid_by.slice(-4)}`}
-                            {" "}//{" "}{date}
+                          <p className="text-sm font-semibold text-foreground">{exp.description}</p>
+                          <p className="text-xs text-muted mt-0.5">
+                            Paid by{" "}
+                            <span className="font-medium">
+                              {exp.paid_by.toLowerCase() === address?.toLowerCase()
+                                ? "you"
+                                : `${exp.paid_by.slice(0, 6)}…${exp.paid_by.slice(-4)}`}
+                            </span>
+                            {" · "}{date}
                           </p>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                           <span className="text-sm font-bold text-foreground font-mono">
                             {formatUSDC(exp.amount)}
                           </span>
                           {isAdmin && (
                             <button
                               onClick={() => handleDeleteExpense(exp.id)}
-                              className="text-xs text-muted hover:text-red-500 transition-colors font-mono"
+                              className="text-xs text-muted hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 px-1"
                               title="Delete expense"
                             >
-                              [DEL]
+                              ×
                             </button>
                           )}
                         </div>
@@ -268,7 +299,7 @@ export default function GroupPage({
           </div>
 
           {/* Right: Actions & Members */}
-          <div className="space-y-10">
+          <div className="space-y-6">
             {/* Add Expense (admin only) */}
             {address && isAdmin && (
               <ExpenseForm
@@ -286,6 +317,7 @@ export default function GroupPage({
               settlements={settlements}
               members={members}
               currentAddress={address ?? undefined}
+              groupId={id}
             />
 
             {/* Settle */}
@@ -317,25 +349,31 @@ export default function GroupPage({
             )}
 
             {/* Members */}
-            <div className="minimal-card bg-card p-6">
-              <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6 border-b border-border pb-2">
-                Group_Members
+            <div className="bg-card border border-border rounded-xl p-6">
+              <h3 className="text-base font-semibold text-foreground mb-4 flex items-center gap-2">
+                Members
+                <span className="text-xs text-muted font-normal">{members.length} people</span>
               </h3>
-              <ul className="mb-6 space-y-3">
+              <ul className="mb-4 space-y-2">
                 {members.map((m) => {
                   const isYou = m.toLowerCase() === address?.toLowerCase();
                   const isMemberAdmin = m.toLowerCase() === group.created_by?.toLowerCase();
                   return (
                     <li
                       key={m}
-                      className="flex items-center justify-between text-xs font-mono text-muted border-b border-border pb-2 last:border-0"
+                      className="flex items-center justify-between text-sm py-2 border-b border-border/60 last:border-0"
                     >
-                      <span className={isYou ? "text-foreground font-bold" : ""}>
-                        {isYou ? `${m} (YOU)` : m}
+                      <span className={`font-mono text-xs ${isYou ? "text-foreground font-semibold" : "text-muted"}`}>
+                        {isYou ? "You" : `${m.slice(0, 6)}…${m.slice(-4)}`}
+                        {isYou && " (you)"}
                       </span>
-                      {isMemberAdmin && (
-                        <span className="text-muted uppercase tracking-wider font-bold">[ADMIN]</span>
-                      )}
+                      <div className="flex items-center gap-2">
+                        {isMemberAdmin && (
+                          <span className="text-xs bg-accent/10 border border-accent/30 text-accent px-2 py-0.5 rounded-full">
+                            Admin
+                          </span>
+                        )}
+                      </div>
                     </li>
                   );
                 })}
@@ -343,25 +381,27 @@ export default function GroupPage({
 
               {isAdmin && (
                 <div className="pt-4 border-t border-border">
-                  <form onSubmit={handleAddMember} className="flex gap-3">
+                  <p className="text-xs text-muted mb-3">Add a member by their wallet address:</p>
+                  <form onSubmit={handleAddMember} className="flex gap-2">
                     <input
                       type="text"
-                      placeholder="0x...ADDR"
+                      placeholder="0x... wallet address"
                       value={addMember}
                       onChange={(e) => setAddMember(e.target.value)}
-                      className="minimal-input w-full font-mono text-xs"
+                      className="minimal-input w-full text-xs rounded-lg font-mono"
                     />
                     <button
                       type="submit"
                       disabled={addingMember}
-                      className="btn-primary px-4 py-2 text-xs uppercase font-mono font-bold"
+                      className="btn-primary px-3 py-2 text-xs font-semibold rounded-lg shrink-0 disabled:opacity-50"
                     >
-                      {addingMember ? "..." : "ADD"}
+                      {addingMember ? "…" : "Add"}
                     </button>
                   </form>
                   {memberError && (
-                    <p className="mt-3 text-xs text-red-500 font-mono border-l-2 border-red-500 pl-3">
-                      {memberError}
+                    <p className="mt-3 text-xs text-red-400 flex items-start gap-1.5">
+                      <span>⚠️</span>
+                      <span>{memberError}</span>
                     </p>
                   )}
                 </div>

@@ -24,14 +24,20 @@ export function ShareLink({ groupId }: Props) {
   return (
     <button
       onClick={copyLink}
-      className="btn-primary px-4 py-3 text-xs uppercase tracking-widest flex items-center gap-2"
-      title="COPY_INVITE_LINK"
+      className={`px-4 py-2 text-sm font-medium rounded-lg border flex items-center gap-2 transition-all ${
+        copied
+          ? "border-accent/40 bg-accent/10 text-accent"
+          : "border-border bg-card text-foreground hover:border-foreground"
+      }`}
+      title="Copy invite link"
     >
       {copied ? (
-        <span className="text-accent font-bold">COPIED_TO_CLIPBOARD</span>
+        <>
+          <span>✓</span> Copied!
+        </>
       ) : (
         <>
-          <span className="font-bold text-lg leading-none">[+]</span> INVITE_LINK
+          <span>🔗</span> Invite
         </>
       )}
     </button>

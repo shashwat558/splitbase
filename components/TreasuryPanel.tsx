@@ -108,14 +108,12 @@ export function TreasuryPanel({
   if (!treasuryAddress) {
     if (factoryNotConfigured) {
       return (
-        <div className="minimal-card bg-card p-6 space-y-4">
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-widest border-b border-border pb-2">
-            Group_Treasury
+        <div className="bg-card border border-border rounded-xl p-6 space-y-3">
+          <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+            🏛️ Group Treasury
           </h3>
-          <p className="text-xs font-mono text-muted">
-            // TREASURY_FACTORY_ADDRESS not set in .env<br />
-            // Deploy factory: <span className="text-accent">forge script script/DeployTreasuryFactory.s.sol --rpc-url https://sepolia.base.org --account deployer --broadcast</span><br />
-            // Then add NEXT_PUBLIC_TREASURY_FACTORY_ADDRESS=0x... to .env
+          <p className="text-sm text-muted">
+            Treasury is not configured yet. Contact your admin to set it up.
           </p>
         </div>
       );
@@ -123,47 +121,46 @@ export function TreasuryPanel({
 
     if (!isAdmin) {
       return (
-        <div className="minimal-card bg-card p-6 space-y-3">
-          <h3 className="text-sm font-bold text-foreground uppercase tracking-widest border-b border-border pb-2">
-            Group_Treasury
+        <div className="bg-card border border-border rounded-xl p-6 space-y-3">
+          <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+            🏛️ Group Treasury
           </h3>
-          <p className="text-xs font-mono text-muted py-2">// TREASURY_NOT_ACTIVATED — ask admin to activate</p>
+          <p className="text-sm text-muted">The group treasury hasn't been set up yet. Ask the group admin to activate it.</p>
         </div>
       );
     }
 
     return (
-      <div className="minimal-card bg-card p-6 space-y-4">
-        <h3 className="text-sm font-bold text-foreground uppercase tracking-widest border-b border-border pb-2">
-          Group_Treasury
+      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+        <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
+          🏛️ Group Treasury
         </h3>
-        <p className="text-xs font-mono text-muted leading-relaxed">
-          // members pay into a shared on-chain vault<br />
-          // admin disperses to creditors once funded<br />
-          // no direct P2P required
+        <p className="text-sm text-muted leading-relaxed">
+          A shared vault where members deposit their share. The admin then pays out everyone who is owed money — no awkward peer-to-peer transfers needed.
         </p>
         {deployHook.error && (
-          <p className="text-xs text-red-500 font-mono border-l-2 border-red-500 pl-3">
-            ERR: {deployHook.error}
+          <p className="text-sm text-red-400 bg-red-500/10 p-3 border border-red-500/20 rounded-lg flex items-start gap-2">
+            <span>⚠️</span>
+            <span>{deployHook.error}</span>
           </p>
         )}
         <button
           onClick={deployHook.deploy}
           disabled={deployHook.status !== "idle" && deployHook.status !== "error"}
-          className="w-full btn-primary py-3 text-xs font-mono uppercase tracking-widest font-bold disabled:opacity-50"
+          className="w-full btn-primary py-3 text-sm font-semibold rounded-lg disabled:opacity-50"
         >
-          {deployHook.status === "pending"    ? "WAITING_FOR_SIGNATURE..."  :
-           deployHook.status === "confirming" ? "DEPLOYING_CONTRACT..."     :
-           "ACTIVATE_TREASURY →"}
+          {deployHook.status === "pending"    ? "⟳ Waiting for signature…"  :
+           deployHook.status === "confirming" ? "⟳ Deploying contract…"     :
+           "Activate Treasury →"}
         </button>
         {deployHook.txHash && (
           <a
             href={`https://sepolia.basescan.org/tx/${deployHook.txHash}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="block text-xs font-mono text-accent underline hover:text-foreground"
+            className="block text-xs text-accent hover:underline text-center"
           >
-            VIEW_TX ↗
+            View transaction ↗
           </a>
         )}
       </div>
@@ -195,33 +192,33 @@ export function TreasuryPanel({
       </div>
 
       {/* Balance */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="border border-border p-3">
-          <p className="text-xs font-mono text-muted uppercase tracking-wide mb-1">Balance</p>
-          <p className="text-xl font-bold font-mono text-foreground">{balanceEth.toFixed(4)} ETH</p>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="border border-border rounded-lg p-3">
+          <p className="text-xs text-muted mb-1">Vault balance</p>
+          <p className="text-lg font-bold font-mono text-foreground">{balanceEth.toFixed(4)} ETH</p>
         </div>
-        <div className="border border-border p-3">
-          <p className="text-xs font-mono text-muted uppercase tracking-wide mb-1">To_Disperse</p>
-          <p className="text-xl font-bold font-mono text-foreground">{formatUSDC(totalToDisperse)}</p>
+        <div className="border border-border rounded-lg p-3">
+          <p className="text-xs text-muted mb-1">To pay out</p>
+          <p className="text-lg font-bold font-mono text-foreground">{formatUSDC(totalToDisperse)}</p>
         </div>
       </div>
 
       {/* Debtors status (who still needs to deposit) */}
       {debtors.length > 0 && (
         <div>
-          <p className="text-xs font-mono text-muted uppercase tracking-widest mb-3">Pending_Deposits</p>
-          <ul className="space-y-2">
+          <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Still need to deposit</p>
+          <ul className="space-y-1.5">
             {debtors.map(({ addr, owes }) => {
               const isYou = addr.toLowerCase() === currentAddress.toLowerCase();
               return (
                 <li
                   key={addr}
-                  className="flex items-center justify-between text-xs font-mono border-b border-border pb-2 last:border-0"
+                  className="flex items-center justify-between text-xs py-1.5 border-b border-border/60 last:border-0"
                 >
-                  <span className={isYou ? "text-foreground font-bold" : "text-muted"}>
-                    {isYou ? "YOU" : `${addr.slice(0, 6)}…${addr.slice(-4)}`}
+                  <span className={isYou ? "text-foreground font-semibold" : "text-muted font-mono"}>
+                    {isYou ? "You" : `${addr.slice(0, 6)}…${addr.slice(-4)}`}
                   </span>
-                  <span className="text-red-400">−{formatUSDC(owes)}</span>
+                  <span className="text-red-400 font-mono">−{formatUSDC(owes)}</span>
                 </li>
               );
             })}
@@ -232,10 +229,10 @@ export function TreasuryPanel({
       {/* My deposit action */}
       {myDebt > 0 && !hasBeenDispersed && (
         <div className="space-y-3 border-t border-border pt-4">
-          <p className="text-xs font-mono text-muted uppercase tracking-widest">Your_Deposit</p>
-          <p className="text-xs font-mono text-muted">
-            // you owe{" "}
-            <span className="text-foreground font-bold">{formatUSDC(myDebt)}</span> — deposit to treasury
+          <p className="text-sm font-semibold text-foreground">Your deposit</p>
+          <p className="text-sm text-muted">
+            You owe{" "}
+            <span className="text-foreground font-bold font-mono">{formatUSDC(myDebt)}</span> — deposit it to the group vault.
           </p>
           <div className="flex gap-2">
             <input
@@ -245,32 +242,33 @@ export function TreasuryPanel({
               placeholder={myDebt.toFixed(4)}
               value={depositInput}
               onChange={(e) => setDepositInput(e.target.value)}
-              className="minimal-input w-full font-mono text-xs"
+              className="minimal-input w-full text-sm rounded-lg font-mono"
             />
             <button
               onClick={() => setDepositInput(myDebt.toFixed(6))}
-              className="flex-shrink-0 border border-border text-xs font-mono px-3 py-2 text-muted hover:text-foreground transition-colors"
-              title="Fill with owed amount"
+              className="flex-shrink-0 border border-border text-xs px-3 py-2 text-muted hover:text-foreground transition-colors rounded-lg"
+              title="Fill exact amount owed"
             >
-              FILL
+              Fill
             </button>
           </div>
           {depositHook.error && (
-            <p className="text-xs text-red-500 font-mono border-l-2 border-red-500 pl-3">
-              ERR: {depositHook.error}
+            <p className="text-sm text-red-400 bg-red-500/10 p-3 border border-red-500/20 rounded-lg flex items-start gap-2">
+              <span>⚠️</span>
+              <span>{depositHook.error}</span>
             </p>
           )}
           {depositHook.status === "success" ? (
             <div className="space-y-2">
-              <p className="text-xs font-mono text-accent">// DEPOSIT_CONFIRMED</p>
+              <p className="text-sm text-accent font-medium">✅ Deposit confirmed!</p>
               {depositHook.txHash && (
                 <a
                   href={`https://sepolia.basescan.org/tx/${depositHook.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-xs font-mono text-accent underline"
+                  className="block text-xs text-accent hover:underline"
                 >
-                  VIEW_TX ↗
+                  View transaction ↗
                 </a>
               )}
               <button
@@ -278,9 +276,9 @@ export function TreasuryPanel({
                   depositHook.reset();
                   setDepositInput("");
                 }}
-                className="w-full border border-border text-xs font-mono py-2 uppercase text-muted hover:text-foreground transition-colors"
+                className="w-full border border-border text-sm font-medium py-2 rounded-lg text-muted hover:text-foreground transition-colors"
               >
-                CLOSE
+                Done
               </button>
             </div>
           ) : (
@@ -290,11 +288,11 @@ export function TreasuryPanel({
                 if (!isNaN(amount) && amount > 0) depositHook.deposit(amount);
               }}
               disabled={depositHook.status !== "idle" && depositHook.status !== "error"}
-              className="w-full btn-primary py-3 text-xs font-mono uppercase tracking-widest font-bold disabled:opacity-50"
+              className="w-full btn-primary py-3 text-sm font-semibold rounded-lg disabled:opacity-50"
             >
-              {depositHook.status === "pending"    ? "WAITING_FOR_SIGNATURE..." :
-               depositHook.status === "confirming" ? "CONFIRMING_TX..."        :
-               "DEPOSIT_TO_TREASURY →"}
+              {depositHook.status === "pending"    ? "⟳ Waiting for signature…" :
+               depositHook.status === "confirming" ? "⟳ Confirming…"            :
+               "Deposit to Treasury →"}
             </button>
           )}
         </div>
@@ -302,59 +300,60 @@ export function TreasuryPanel({
 
       {hasBeenDispersed && myBalance < -0.000001 && (
         <div className="border-t border-border pt-4">
-          <p className="text-xs font-mono text-yellow-500 uppercase tracking-widest">Settled_Via_Treasury</p>
-          <p className="text-xs font-mono text-muted mt-2">Admin dispersed the treasury. Your debt has been cleared.</p>
+          <p className="text-sm font-semibold text-yellow-500">🎊 Settled via Treasury</p>
+          <p className="text-sm text-muted mt-1">The admin has paid out all members. Your balance has been cleared.</p>
         </div>
       )}
 
       {/* Admin disperse action */}
       {isAdmin && creditors.length > 0 && (
         <div className="space-y-3 border-t border-border pt-4">
-          <p className="text-xs font-mono text-muted uppercase tracking-widest">Admin_Disperse</p>
+          <p className="text-sm font-semibold text-foreground">Pay out creditors</p>
 
           {/* Creditor breakdown */}
-          <ul className="space-y-2">
+          <ul className="space-y-1.5">
             {creditors.map(({ addr, owed }) => (
               <li
                 key={addr}
-                className="flex items-center justify-between text-xs font-mono border-b border-border pb-2 last:border-0"
+                className="flex items-center justify-between text-xs py-1.5 border-b border-border/60 last:border-0"
               >
-                <span className="text-muted">{`${addr.slice(0, 6)}…${addr.slice(-4)}`}</span>
-                <span className="text-green-400">+{formatUSDC(owed)}</span>
+                <span className="text-muted font-mono">{`${addr.slice(0, 6)}…${addr.slice(-4)}`}</span>
+                <span className="text-green-400 font-mono">+{formatUSDC(owed)}</span>
               </li>
             ))}
           </ul>
 
           {balanceEth < totalToDisperse - 0.000001 && (
-            <p className="text-xs font-mono text-yellow-500 border-l-2 border-yellow-500 pl-3">
-              // INSUFFICIENT_BALANCE — treasury has {balanceEth.toFixed(4)} ETH, needs {totalToDisperse.toFixed(4)} ETH
+            <p className="text-sm text-yellow-500 bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-lg">
+              ⚠️ Vault balance is too low ({balanceEth.toFixed(4)} ETH) — needs {totalToDisperse.toFixed(4)} ETH to pay out.
             </p>
           )}
 
           {disperseHook.error && (
-            <p className="text-xs text-red-500 font-mono border-l-2 border-red-500 pl-3">
-              ERR: {disperseHook.error}
+            <p className="text-sm text-red-400 bg-red-500/10 p-3 border border-red-500/20 rounded-lg flex items-start gap-2">
+              <span>⚠️</span>
+              <span>{disperseHook.error}</span>
             </p>
           )}
 
           {disperseHook.status === "success" ? (
             <div className="space-y-2">
-              <p className="text-xs font-mono text-accent">// DISPERSE_COMPLETE</p>
+              <p className="text-sm text-accent font-medium">✅ All members paid out!</p>
               {disperseHook.txHash && (
                 <a
                   href={`https://sepolia.basescan.org/tx/${disperseHook.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block text-xs font-mono text-accent underline"
+                  className="block text-xs text-accent hover:underline"
                 >
-                  VIEW_TX ↗
+                  View transaction ↗
                 </a>
               )}
               <button
                 onClick={disperseHook.reset}
-                className="w-full border border-border text-xs font-mono py-2 uppercase text-muted hover:text-foreground transition-colors"
+                className="w-full border border-border text-sm py-2 rounded-lg text-muted hover:text-foreground transition-colors"
               >
-                CLOSE_PANEL
+                Done
               </button>
             </div>
           ) : (
@@ -364,12 +363,12 @@ export function TreasuryPanel({
                 (disperseHook.status !== "idle" && disperseHook.status !== "error") ||
                 balanceEth < totalToDisperse - 0.000001
               }
-              className="w-full btn-primary py-3 text-xs font-mono uppercase tracking-widest font-bold disabled:opacity-50"
+              className="w-full btn-primary py-3 text-sm font-semibold rounded-lg disabled:opacity-50"
             >
-              {disperseHook.status === "pending"    ? "WAITING_FOR_SIGNATURE..." :
-               disperseHook.status === "confirming" ? "CONFIRMING_TX..."        :
-               disperseHook.status === "recording"  ? "RECORDING..."            :
-               `DISPERSE_${formatUSDC(totalToDisperse)}_TO_${creditors.length}_MEMBERS →`}
+              {disperseHook.status === "pending"    ? "⟳ Waiting for signature…" :
+               disperseHook.status === "confirming" ? "⟳ Confirming…"            :
+               disperseHook.status === "recording"  ? "⟳ Recording…"             :
+               `Pay out ${formatUSDC(totalToDisperse)} to ${creditors.length} member${creditors.length !== 1 ? "s" : ""} →`}
             </button>
           )}
         </div>
@@ -378,7 +377,7 @@ export function TreasuryPanel({
       {/* All settled */}
       {debtors.length === 0 && creditors.length === 0 && (
         <div className="text-center py-2">
-          <p className="text-xs font-mono text-muted">// ALL_SETTLED — no outstanding balances</p>
+          <p className="text-sm text-muted">🎉 All settled — no outstanding balances.</p>
         </div>
       )}
     </div>

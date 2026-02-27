@@ -10,35 +10,38 @@ interface Props {
 
 export function GroupCard({ group, memberCount }: Props) {
   const date = new Date(group.created_at).toLocaleDateString("en-US", {
-    month: "2-digit",
-    day: "2-digit",
-    year: "2-digit",
-  }); // MM/DD/YY format
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
     <Link
       href={`/group/${group.id}`}
-      className="group block minimal-card bg-card hover:bg-muted/10 transition-all relative overflow-hidden h-full flex flex-col justify-between"
+      className="group block bg-card border border-border rounded-xl p-6 hover:border-accent/50 hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 relative overflow-hidden flex flex-col justify-between h-full"
     >
-      <div className="absolute top-0 right-0 w-3 h-3 border-l border-b border-border opacity-0 group-hover:opacity-100 transition-opacity bg-muted/20"></div>
-      
-      <div className="flex items-start justify-between mb-6">
-        <h3 className="text-xl font-bold text-foreground group-hover:text-accent transition-colors truncate pr-4 uppercase tracking-tight">
+      {/* Subtle accent line on hover */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-accent opacity-0 group-hover:opacity-100 transition-opacity rounded-t-xl" />
+
+      <div className="flex items-start justify-between mb-5">
+        <h3 className="text-lg font-bold text-foreground group-hover:text-accent transition-colors truncate pr-3 leading-snug">
           {group.name}
         </h3>
-        <span className="text-sm font-mono text-muted border border-border px-2 py-1 whitespace-nowrap bg-background">
+        <span className="text-xs text-muted border border-border px-2 py-1 rounded-md bg-background whitespace-nowrap shrink-0">
           {date}
         </span>
       </div>
-      
-      <div className="flex items-end justify-between mt-auto pt-4 border-t border-border/50">
-        <p className="text-sm text-muted font-mono">
-            ID: {group.id.slice(0, 4)}...{group.id.slice(-4)}
-        </p>
-        <div className="text-sm font-bold font-mono text-muted group-hover:text-foreground transition-colors">
-            MEMBERS: {memberCount}
-        </div>
+
+      <div className="flex items-center justify-between mt-auto pt-4 border-t border-border/60">
+        <span className="inline-flex items-center gap-1.5 text-sm text-muted">
+          <span>👥</span>
+          {memberCount} {memberCount === 1 ? "member" : "members"}
+        </span>
+        <span className="text-xs text-accent font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+          Open →
+        </span>
       </div>
     </Link>
   );
 }
+

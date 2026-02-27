@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { CreateExpensePayload, ExpenseSplit } from "@/types";
+import { useToast } from "@/components/Toast";
 
 interface Props {
   groupId: string;
@@ -15,6 +16,7 @@ export function ExpenseForm({ groupId, paidBy, members, authFetch, onCreated }: 
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const otherMembers = members.filter((m) => m.toLowerCase() !== paidBy.toLowerCase());
 
@@ -75,65 +77,68 @@ export function ExpenseForm({ groupId, paidBy, members, authFetch, onCreated }: 
         throw new Error(body.error ?? "Failed to add expense");
       }
 
+      toast("Expense added! 🧾", "success");
       setDescription("");
       setSplitAmounts(Object.fromEntries(otherMembers.map((m) => [m, ""])));
       onCreated();
     } catch (err) {
-      setError((err as Error).message);
+      const msg = (err as Error).message;
+      setError(msg);
+      toast(msg, "error");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="minimal-card bg-card">
-      <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6 border-b border-border pb-2">
-        Record_Transaction
+    <div className="bg-card border border-border rounded-xl p-6">
+      <h3 className="text-base font-semibold text-foreground mb-5 flex items-center gap-2">
+        ➕ Add Expense
       </h3>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
         {/* Description */}
         <div className="space-y-2">
-          <label className="text-xs font-mono font-bold text-muted uppercase">Description</label>
+          <label className="text-sm font-medium text-foreground">What was this for?</label>
           <input
             type="text"
-            placeholder="DINNER, HOTEL, TICKETS..."
+            placeholder="e.g. Dinner, Hotel, Taxi, Groceries…"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="minimal-input w-full font-mono text-sm"
+            className="minimal-input w-full rounded-lg text-sm"
             disabled={loading}
           />
         </div>
 
         {/* Per-member splits */}
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-mono font-bold text-muted uppercase">
-              Amounts Owed to You
+            <label className="text-sm font-medium text-foreground">
+              How much does each person owe?
             </label>
             {otherMembers.length > 1 && total > 0 && (
               <button
                 type="button"
                 onClick={handleEqualSplit}
-                className="text-[10px] font-mono text-muted border border-border px-2 py-1 hover:text-foreground hover:border-foreground transition-colors uppercase tracking-wider"
+                className="text-xs text-accent border border-accent/30 bg-accent/5 px-2.5 py-1 rounded-md hover:bg-accent/10 transition-colors"
               >
-                [= Split Equally]
+                ÷ Split equally
               </button>
             )}
           </div>
 
           {otherMembers.length === 0 ? (
-            <p className="text-xs font-mono text-muted border border-dashed border-border p-3">
-              // NO_OTHER_MEMBERS — add members first
-            </p>
+            <div className="text-sm text-muted bg-card/50 border border-dashed border-border p-4 rounded-lg text-center">
+              Add members to the group first, then you can split expenses between them.
+            </div>
           ) : (
-            <ul className="divide-y divide-border border border-border">
+            <ul className="divide-y divide-border/60 border border-border rounded-lg overflow-hidden">
               {otherMembers.map((m) => (
-                <li key={m} className="flex items-center gap-3 px-4 py-3 bg-background">
+                <li key={m} className="flex items-center gap-3 px-4 py-3 bg-background/50">
                   <span className="flex-1 font-mono text-xs text-muted truncate">
-                    {m.slice(0, 6)}...{m.slice(-4)}
+                    {m.slice(0, 6)}…{m.slice(-4)}
                   </span>
-                  <span className="text-xs font-mono text-muted shrink-0">OWES:</span>
+                  <span className="text-xs text-muted shrink-0">owes</span>
                   <input
                     type="number"
                     placeholder="0.0000"
@@ -141,9 +146,10 @@ export function ExpenseForm({ groupId, paidBy, members, authFetch, onCreated }: 
                     step="0.0001"
                     value={splitAmounts[m] ?? ""}
                     onChange={(e) => handleSplitChange(m, e.target.value)}
-                    className="minimal-input w-28 font-mono text-sm text-right"
+                    className="minimal-input w-28 font-mono text-sm text-right rounded-md"
                     disabled={loading}
                   />
+                  <span className="text-xs text-muted shrink-0">USDC</span>
                 </li>
               ))}
             </ul>
@@ -151,25 +157,28 @@ export function ExpenseForm({ groupId, paidBy, members, authFetch, onCreated }: 
         </div>
 
         {/* Running total */}
-        <div className="flex items-center justify-between border border-border bg-card px-4 py-3">
-          <span className="text-xs font-mono text-muted uppercase tracking-wider">Total</span>
-          <span className={`font-mono font-bold text-base ${total > 0 ? "text-foreground" : "text-muted"}`}>
-            {total > 0 ? total.toFixed(4) : "0.0000"} ETH
-          </span>
-        </div>
+        {total > 0 && (
+          <div className="flex items-center justify-between bg-accent/5 border border-accent/20 px-4 py-3 rounded-lg">
+            <span className="text-sm text-accent font-medium">Total expense</span>
+            <span className="font-bold text-base text-accent font-mono">
+              {total.toFixed(4)} USDC
+            </span>
+          </div>
+        )}
 
         {error && (
-          <div className="border border-red-500/50 bg-red-500/10 p-3 text-xs text-red-500 font-mono">
-            ERROR: {error}
+          <div className="border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400 rounded-lg flex items-start gap-2">
+            <span className="shrink-0">⚠️</span>
+            <span>{error}</span>
           </div>
         )}
 
         <button
           type="submit"
           disabled={loading || total <= 0 || !description.trim()}
-          className="btn-primary w-full py-3 text-sm uppercase tracking-widest disabled:opacity-40"
+          className="btn-primary w-full py-3 text-sm font-semibold rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          {loading ? "PROCESSING..." : "ADD_RECORD"}
+          {loading ? "Adding…" : "Add Expense"}
         </button>
       </form>
     </div>

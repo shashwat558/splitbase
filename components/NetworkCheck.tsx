@@ -18,17 +18,16 @@ export function NetworkCheck() {
   if (!isConnected || chainId === baseSepolia.id) return null;
 
   return (
-    <div className="bg-card border-b border-border px-6 py-3 text-center text-sm font-mono text-muted relative z-50 flex items-center justify-center gap-6">
-      <span>
-        <span className="text-red-500 font-bold mr-2">[WRONG_NETWORK]</span>
-        BASE_SEPOLIA_REQUIRED
+    <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 py-3 text-center text-sm relative z-50 flex items-center justify-center gap-4">
+      <span className="text-amber-400 font-medium">
+        ⚠️ Wrong network — please switch to <strong>Base Sepolia</strong> to continue
       </span>
       <button
         onClick={() => switchChain({ chainId: baseSepolia.id })}
         disabled={isPending}
-        className="btn-primary px-4 py-1.5 text-xs uppercase tracking-widest font-mono font-bold disabled:opacity-50"
+        className="border border-amber-500/50 bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 px-4 py-1.5 text-xs font-semibold rounded-lg transition-colors disabled:opacity-50"
       >
-        {isPending ? "SWITCHING..." : "SWITCH_NETWORK"}
+        {isPending ? "Switching..." : "Switch Network"}
       </button>
     </div>
   );
