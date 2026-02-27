@@ -3,12 +3,6 @@ import { verifyMessage } from "viem";
 import { signJWT, isNonceValid, generateNonce } from "@/lib/auth";
 import { createServiceClient } from "@/lib/supabase";
 
-/**
- * POST /api/auth/verify
- * Body: { address: string, signature: string }
- *
- * Verifies the wallet signature and issues a JWT.
- */
 export async function POST(req: NextRequest) {
   const { address, signature } = await req.json();
 
@@ -20,12 +14,10 @@ export async function POST(req: NextRequest) {
   const nonce = generateNonce(addr);
   const message = `Sign in to SplitBase\n\nWallet: ${addr}\nNonce: ${nonce}`;
 
-  // Verify the signature using viem
   let valid = false;
   try {
     valid = await verifyMessage({ address: addr, message, signature });
   } catch {
-    // also try previous time window (handle ~2min clock skew)
     try {
       const prevBucket = Math.floor(Date.now() / 120_000) - 1;
       const prevNonce = `${addr}-${prevBucket}`;

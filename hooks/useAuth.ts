@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSignMessage } from "wagmi";
 import { useWallet } from "./useWallet";
 
@@ -21,16 +21,9 @@ function clearToken() {
   if (typeof window !== "undefined") localStorage.removeItem(TOKEN_KEY);
 }
 
-/**
- * Manages SIWE (Sign-In with Ethereum) session.
- * Auto-signs in when wallet connects.
- * Returns `authFetch` — a fetch wrapper that attaches the JWT.
- */
 export function useAuth() {
   const { address, isConnected } = useWallet();
 
-  // ── Initialize synchronously from localStorage to avoid the race condition
-  // where both effects see initial state before the "load token" effect runs.
   const [authState, setAuthState] = useState<AuthState>(() =>
     loadToken() ? "authenticated" : "unauthenticated"
   );
@@ -38,9 +31,13 @@ export function useAuth() {
 
   const { signMessageAsync } = useSignMessage();
 
-  // When wallet disconnects, clear session
+  const hasConnectedRef = useRef(false);
+
   useEffect(() => {
-    if (!isConnected) {
+    if (isConnected) {
+      hasConnectedRef.current = true;
+    } else if (hasConnectedRef.current) {
+
       clearToken();
       setToken(null);
       setAuthState("unauthenticated");
@@ -52,14 +49,12 @@ export function useAuth() {
     setAuthState("signing");
 
     try {
-      // 1. Get the message to sign
+
       const nonceRes = await fetch(`/api/auth/nonce?address=${address}`);
       const { message } = await nonceRes.json();
 
-      // 2. Ask wallet to sign
       const signature = await signMessageAsync({ message });
 
-      // 3. Verify and get JWT
       const verifyRes = await fetch("/api/auth/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -97,13 +92,31 @@ export function useAuth() {
       }
 
       const jwt = token ?? loadToken();
-      return fetch(url, {
+      const res = await fetch(url, {
         ...options,
         headers: {
           ...(options.headers ?? {}),
           Authorization: jwt ? `Bearer ${jwt}` : "",
         },
       });
+
+      // Token expired — clear it and re-auth transparently, then retry once
+      if (res.status === 401) {
+        clearToken();
+        setToken(null);
+        setAuthState("unauthenticated");
+        await signIn();
+        const freshJwt = loadToken();
+        return fetch(url, {
+          ...options,
+          headers: {
+            ...(options.headers ?? {}),
+            Authorization: freshJwt ? `Bearer ${freshJwt}` : "",
+          },
+        });
+      }
+
+      return res;
     },
     [token, signIn]
   );

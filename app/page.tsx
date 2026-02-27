@@ -146,7 +146,7 @@ export default function Home() {
         <footer className="mt-auto pt-20 text-xs font-mono text-muted w-full max-w-6xl flex justify-between items-end animate-fade-in-up delay-700 opacity-50">
             <div className="flex flex-col gap-1">
               <span>NETWORK: BASE_SEPOLIA</span>
-              <span>CONTRACT: 0x...FACTORY</span>
+              <span>CONTRACT: <a href="https://sepolia.basescan.org/address/0x13e6b719822f7e83d6a33ac492f06dec2a84cff6" target="_blank" rel="noopener noreferrer" className="hover:text-accent underline underline-offset-2 transition-colors">0x13e6...cff6</a></span>
             </div>
             <div className="flex flex-col gap-1 text-right">
               <span>STATUS: <span className="text-accent animate-pulse">● ONLINE</span></span>

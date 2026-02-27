@@ -24,17 +24,13 @@ export async function verifyJWT(token: string): Promise<string | null> {
   }
 }
 
-/**
- * Generate a time-bucketed nonce for a given address.
- * Valid for 2 minutes (buckets of 120 seconds).
- * No DB storage needed — deterministic from address + time window.
- */
+
 export function generateNonce(address: string): string {
   const bucket = Math.floor(Date.now() / 120_000);
   return `${address.toLowerCase()}-${bucket}`;
 }
 
-/** Returns the nonce the frontend should sign */
+
 export function buildSignMessage(address: string): string {
   const nonce = generateNonce(address);
   return `Sign in to SplitBase\n\nWallet: ${address.toLowerCase()}\nNonce: ${nonce}`;
